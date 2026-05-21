@@ -8,7 +8,7 @@ namespace SmartAssetTracking.Application
     {
         public static void Run()
         {
-            Console.WriteLine("HELLO BABYW");
+            MainMenu.Show();
         }
     }
 }

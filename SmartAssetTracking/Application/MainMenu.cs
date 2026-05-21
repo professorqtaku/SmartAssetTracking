@@ -1,5 +1,5 @@
 ﻿
-namespace AssetTracking2.Application
+namespace SmartAssetTracking.Application
 {
     class MainMenu
     {
@@ -18,16 +18,37 @@ namespace AssetTracking2.Application
                 Console.WriteLine("5. Exit");
                 Console.Write("\nSelect an option: ");
 
-                //switch (Console.ReadLine())
-                //{
-                //    case "1":  break;
-                //    case "2": CreateComputer(); break;
-                //    case "3": CreateMobile(); break;
-                //    case "4": DeleteAsset(); break;
-                //    case "5": running = false; break;
-                //    default: Console.WriteLine("Invalid option. Press Enter to retry."); Console.ReadLine(); break;
-                //}
+                switch (Console.ReadLine())
+                {
+                    case "1": ViewAssets(); break;
+                    case "2": CreateComputer(); break;
+                    case "3": CreateMobile(); break;
+                    case "4": DeleteAsset(); break;
+                    case "5": running = false; break;
+                    default: Console.WriteLine("Invalid option. Press Enter to retry."); Console.ReadLine(); break;
+                }
             }
+        }
+
+        private static void ViewAssets()
+        {
+            Console.WriteLine("Viewing all assets...");
+        }
+
+        private static void CreateComputer()
+        {
+            
+        }
+
+        private static void CreateMobile()
+        {
+            Console.WriteLine("Creating a new mobile device...");
+        }
+
+        private static void DeleteAsset()
+        {
+            Console.WriteLine("Deleting an asset...");
+        }
         }
 
     }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartAssetTracking.Entities.Asset;
 
-namespace AssetTracking2.Data
+namespace SmartAssetTracking.Data
 {
     public class AssetDbContext : DbContext
     {
