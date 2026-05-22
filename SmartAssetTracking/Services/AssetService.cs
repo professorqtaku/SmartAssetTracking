@@ -28,42 +28,39 @@ namespace SmartAssetTracking.Services
                 .ToList();
         }
 
-        public Asset? GetAssetByIdAndType(int id, string type)
+        public Asset? GetAssetById(int id)
         {
             using var context = new AssetDbContext();
-
-            if (type.Equals("Computer", StringComparison.OrdinalIgnoreCase))
-            {
-                return context.ComputerAssets?.Find(id);
-            }
-
-            return context.MobileAssets?.Find(id);
+            return context.Assets.Find(id);
         }
 
         public void UpdateAssetSafely(Asset updatedAsset)
         {
-            using var context = new AssetDbContext();
-
-            if (updatedAsset is ComputerAsset computer)
+            using (var context = new AssetDbContext())
             {
-                var existingComputer = context.ComputerAssets.Find(computer.Id);
-                if (existingComputer != null)
+                if (updatedAsset is ComputerAsset computer)
                 {
-                    context.Entry(existingComputer).CurrentValues.SetValues(computer);
-                    existingComputer.FormFactor = computer.FormFactor; // Map type-specific properties
+                    var existingComputer = context.ComputerAssets?.Find(computer.Id);
+                    if (existingComputer != null)
+                    {
+                        context.Entry(existingComputer).CurrentValues.SetValues(computer);
+                        existingComputer.FormFactor = computer.FormFactor;
+                        existingComputer.OfficeId = computer.OfficeId; // 👈 Make sure the Foreign Key copies over!
+                    }
                 }
-            }
-            else if (updatedAsset is MobileAsset mobile)
-            {
-                var existingMobile = context.MobileAssets?.Find(mobile.Id);
-                if (existingMobile != null)
+                else if (updatedAsset is MobileAsset mobile)
                 {
-                    context.Entry(existingMobile).CurrentValues.SetValues(mobile);
-                    existingMobile.DeviceType = mobile.DeviceType; // Map type-specific properties
+                    var existingMobile = context.MobileAssets?.Find(mobile.Id);
+                    if (existingMobile != null)
+                    {
+                        context.Entry(existingMobile).CurrentValues.SetValues(mobile);
+                        existingMobile.DeviceType = mobile.DeviceType;
+                        existingMobile.OfficeId = mobile.OfficeId; // 👈 Make sure the Foreign Key copies over!
+                    }
                 }
-            }
 
-            context.SaveChanges();
+                context.SaveChanges();
+            }
         }
 
         public bool DeleteAsset(int id, string type)

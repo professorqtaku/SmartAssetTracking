@@ -23,5 +23,10 @@ namespace SmartAssetTracking.Services
                 .OrderBy(o => o.OfficeName)
                 .ToList();
         }
+        public List<Office> GetAllOffices()
+        {
+            using var context = new AssetDbContext();
+            return context.Offices.OrderBy(o => o.OfficeName).ToList();
+        }
     }
 }

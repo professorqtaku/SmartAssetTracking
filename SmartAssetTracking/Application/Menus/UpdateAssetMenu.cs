@@ -1,6 +1,7 @@
 ﻿using SmartAssetTracking.Services;
 using SmartAssetTracking.Entities;
 using System;
+using System.Collections.Generic;
 using SmartAssetTracking.Application.Helpers;
 
 namespace SmartAssetTracking.Application.Menus
@@ -8,6 +9,7 @@ namespace SmartAssetTracking.Application.Menus
     internal class UpdateAssetMenu
     {
         private readonly static AssetService _assetService = new AssetService();
+        private readonly static OfficeService _officeService = new OfficeService();
 
         public static void Show()
         {
@@ -22,10 +24,8 @@ namespace SmartAssetTracking.Application.Menus
                 return;
             }
 
-            string type = MainMenu.GetAssetType();
-
             // 1. Locate the asset first across your tables
-            Asset? assetToUpdate = _assetService.GetAssetByIdAndType(id, type);
+            Asset? assetToUpdate = _assetService.GetAssetById(id);
 
             if (assetToUpdate == null)
             {
@@ -84,6 +84,31 @@ namespace SmartAssetTracking.Application.Menus
                 Console.Write($"Enter new Device Type [{mobile.DeviceType}]: ");
                 string deviceInput = Console.ReadLine() ?? string.Empty;
                 mobile.DeviceType = AssetParser.ParseMobileDeviceType(deviceInput, mobile.DeviceType);
+            }
+
+            // 🏢 NEW FEATURE: Office Selection Setup
+            Console.WriteLine("\nAvailable Office Locations:");
+            List<Office> offices = _officeService.GetAllOffices();
+
+            for (int i = 0; i < offices.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {offices[i].OfficeName} ({offices[i].Country})");
+            }
+
+            Console.Write($"Select new office number (1-{offices.Count}) or press Enter to skip: ");
+            string officeInput = Console.ReadLine() ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(officeInput))
+            {
+                if (int.TryParse(officeInput, out int choiceIndex) && choiceIndex > 0 && choiceIndex <= offices.Count)
+                {
+                    // Update the underlying foreign key property to move locations cleanly
+                    assetToUpdate.OfficeId = offices[choiceIndex - 1].Id;
+                }
+                else
+                {
+                    PrintHelper.PrintError("Invalid selection option. Keeping current office allocation.");
+                }
             }
 
             // 4. Save the modified object back into the database

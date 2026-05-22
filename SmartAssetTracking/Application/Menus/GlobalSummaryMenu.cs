@@ -8,6 +8,8 @@ namespace SmartAssetTracking.Application.Menus
 {
     internal static class GlobalSummaryMenu
     {
+        private static readonly AssetService _assetService = new AssetService();
+
         public static void Show()
         {
             Console.Clear();
@@ -19,9 +21,9 @@ namespace SmartAssetTracking.Application.Menus
 
             Console.WriteLine("==================== REPORT ====================");
             Console.WriteLine();
+
             Console.WriteLine("Office Asset Counts");
             Console.WriteLine(new string('-', 45));
-
             foreach (var office in offices)
             {
                 Console.WriteLine(string.Format("{0,-20} : {1}", office.OfficeName, office.Assets.Count));
@@ -30,29 +32,41 @@ namespace SmartAssetTracking.Application.Menus
             Console.WriteLine();
             Console.WriteLine("Assets Near Expiration");
             Console.WriteLine(new string('-', 45));
-
-            // Find tracking elements that have passed or are within 3 months of their 3-year life cycle marker
+            
             DateTime expirationThreshold = DateTime.Now.AddYears(-3).AddMonths(3);
+            var expiringAssets = allAssets.Where(a => a.PurchaseDate <= expirationThreshold).ToList();
 
-            var expiringAssets = allAssets
-                .Where(a => a.PurchaseDate <= expirationThreshold)
-                .ToList();
-
-            if (expiringAssets.Count == 0)
+            if (!expiringAssets.Any())
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("No corporate hardware assets are currently flagged close to expiration.");
+                Console.WriteLine("All system hardware nodes operating within nominal lifecycle parameters.");
                 Console.ResetColor();
             }
             else
             {
                 foreach (var asset in expiringAssets)
                 {
-                    // Highlight expiring line rows dynamically to draw attention 
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Red; // Keep your status highlights in color!
                     Console.WriteLine($"- {asset.Brand} {asset.ModelName} (Purchased: {asset.PurchaseDate:yyyy-MM-dd})");
                 }
                 Console.ResetColor();
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Most Expensive Capital Assets");
+            Console.WriteLine(new string('-', 45));
+
+            var expensiveAssets = allAssets
+                .OrderByDescending(a => a.PurchasePriceUSD)
+                .Take(3)
+                .ToList();
+
+            foreach (var asset in expensiveAssets)
+            {
+                string assetType = asset is ComputerAsset ? "Computer" : "Mobile";
+                string location = asset.Office != null ? asset.Office.OfficeName : "Unassigned Location";
+
+                Console.WriteLine($"- [{assetType}] {asset.Brand} {asset.ModelName} | Cost: ${asset.PurchasePriceUSD:N2} ({location})");
             }
 
             Console.WriteLine();
