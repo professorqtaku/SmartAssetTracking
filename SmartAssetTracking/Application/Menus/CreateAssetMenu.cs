@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using SmartAssetTracking.Application.Helpers;
-using SmartAssetTracking.Entities.Asset;
+using SmartAssetTracking.Entities;
 using SmartAssetTracking.Services;
 using System;
 using System.Collections.Generic;

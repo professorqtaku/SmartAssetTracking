@@ -1,7 +1,6 @@
 ﻿using SmartAssetTracking.Services;
 using SmartAssetTracking.Entities;
 using System;
-using SmartAssetTracking.Entities.Asset;
 using SmartAssetTracking.Application.Helpers;
 
 namespace SmartAssetTracking.Application.Menus

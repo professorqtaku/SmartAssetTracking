@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SmartAssetTracking.Entities.Asset;
+using SmartAssetTracking.Entities;
 using SmartAssetTracking.Services;
 
 namespace SmartAssetTracking.Application

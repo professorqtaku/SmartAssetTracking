@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SmartAssetTracking.Entities.Asset
+namespace SmartAssetTracking.Entities
 {
     public static class AssetConstants
     {

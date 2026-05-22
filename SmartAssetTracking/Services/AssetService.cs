@@ -1,5 +1,5 @@
 ﻿using SmartAssetTracking.Data;
-using SmartAssetTracking.Entities.Asset;
+using SmartAssetTracking.Entities;
 using System.Collections.Generic;
 using System.Linq;
 

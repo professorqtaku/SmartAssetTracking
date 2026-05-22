@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SmartAssetTracking.Entities.Asset
+namespace SmartAssetTracking.Entities
 {
     public enum MobileDeviceType
     {

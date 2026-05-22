@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SmartAssetTracking.Entities.Asset;
+using SmartAssetTracking.Entities;
 
 namespace SmartAssetTracking.Data
 {
