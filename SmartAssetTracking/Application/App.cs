@@ -43,7 +43,7 @@ namespace SmartAssetTracking.Application
 
             ctx.Offices.AddRange(swedenOffice, usaOffice);
 
-            // 2. CRITICAL STEP: Save now to generate valid relational database IDs for the offices!
+            // Save now to generate valid relational database IDs for the offices!
             ctx.SaveChanges();
 
             // Add Computer Assets

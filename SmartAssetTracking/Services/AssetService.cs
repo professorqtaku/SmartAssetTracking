@@ -1,4 +1,5 @@
-﻿using SmartAssetTracking.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartAssetTracking.Data;
 using SmartAssetTracking.Entities;
 using System;
 using System.Collections.Generic;
@@ -85,6 +86,37 @@ namespace SmartAssetTracking.Services
                 context.SaveChanges();
                 return true;
             }
+        }
+        public List<Asset> SearchAssets(string criteria, string query)
+        {
+            using var context = new AssetDbContext();
+            IQueryable<Asset> nodes = context.Assets.Include(a => a.Office);
+
+            if (string.IsNullOrWhiteSpace(query)) return nodes.ToList();
+            query = query.Trim().ToLower();
+
+            return criteria.ToLower() switch
+            {
+                "brand" => nodes.Where(a => a.Brand.ToLower().Contains(query)).ToList(),
+                "model" => nodes.Where(a => a.ModelName.ToLower().Contains(query)).ToList(),
+                "office" => nodes.Where(a => a.Office != null && a.Office.OfficeName.ToLower().Contains(query)).ToList(),
+                "year" => int.TryParse(query, out int year) ? nodes.Where(a => a.PurchaseDate.Year == year).ToList() : new List<Asset>(),
+                _ => nodes.ToList()
+            };
+        }
+        public List<Asset> FilterAssets(string filterType, string argument = "")
+        {
+            using var context = new AssetDbContext();
+            IQueryable<Asset> nodes = context.Assets.Include(a => a.Office);
+
+            return filterType.ToLower() switch
+            {
+                "expired" => nodes.Where(a => a.PurchaseDate <= DateTime.Now.AddYears(-3)).ToList(),
+                "computers" => nodes.Where(a => a is ComputerAsset).ToList(),
+                "mobiles" => nodes.Where(a => a is MobileAsset).ToList(),
+                "office" => nodes.Where(a => a.Office != null && a.Office.OfficeName.ToLower().Contains(argument.ToLower())).ToList(),
+                _ => nodes.ToList()
+            };
         }
     }
 }
