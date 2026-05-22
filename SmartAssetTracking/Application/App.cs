@@ -36,9 +36,10 @@ namespace SmartAssetTracking.Application
 
             Console.WriteLine("Database is empty. Seeding dummy office assets...");
 
-            // 1. Instantiate the Global Offices with real Level 3 fields
             Office swedenOffice = new Office { OfficeName = "Stockholm Corporate Hub", Country = "Sweden", CurrencyCode = "SEK", ExchangeRateUsd = 10.65 };
             Office usaOffice = new Office { OfficeName = "Silicon Valley Office", Country = "USA", CurrencyCode = "USD", ExchangeRateUsd = 1.0 };
+            Office germanyOffice = new Office { OfficeName = "Germany Corporate Office", Country = "Germany", CurrencyCode = "EUR", ExchangeRateUsd = 0.9 };
+            Office turkeyOffice = new Office { OfficeName = "Turkey Valley Office", Country = "Turkey", CurrencyCode = "TRY", ExchangeRateUsd = 46.0 };
 
             ctx.Offices.AddRange(swedenOffice, usaOffice);
 
