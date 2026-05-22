@@ -71,6 +71,13 @@ SmartAssetTracking/
 ```
 
 ⚡ Quick Start Configuration
+Option 1: Open in Visual Studio
+
+1. Clone the project.
+2. Open the SmartAssetTracking.slnx with Visual Studio.
+3. Enjoy!
+
+Option 2: Start project in the Terminal
 1. Prerequisites
 
 Ensure you have the following installed locally:
