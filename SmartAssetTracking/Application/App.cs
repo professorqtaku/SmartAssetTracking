@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using SmartAssetTracking.Application.Menus;
 using SmartAssetTracking.Data;
-using SmartAssetTracking.Entities.Asset;
+using SmartAssetTracking.Entities;
 using System;
+using System.Linq;
 
 namespace SmartAssetTracking.Application
 {
@@ -14,33 +15,35 @@ namespace SmartAssetTracking.Application
         {
             using (var ctx = new AssetDbContext())
             {
-                // 1. Get access to the relational database creation service
-                var databaseCreator = ctx.Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+                // Force migration updates to ensure new columns are always pushed cleanly
+                ctx.Database.Migrate();
 
-                // 2. Check if the database itself or its tables are missing
-                // HasTables() returns false if the DB exists but contains no tables yet
-                if (databaseCreator == null || !databaseCreator.Exists() || !databaseCreator.HasTables())
-                {
-                    Console.WriteLine("Database tables missing. Provisioning schema updates...");
-                    ctx.Database.Migrate();
-                }
-
-                // 3. Run seeding logic (which has its own safety .Any() checks)
+                // Run seeding logic
                 SeedData(ctx);
             }
 
-            // 4. Launch UI
+            // Launch UI
             MainMenu.Show();
         }
+
         private static void SeedData(AssetDbContext ctx)
         {
-            //Check if ANY assets exist across either table.If data exists, skip seeding!
+            // Check if ANY assets exist across either table. If data exists, skip seeding!
             if (ctx.ComputerAssets.Any() || ctx.MobileAssets.Any())
             {
                 return;
             }
 
             Console.WriteLine("Database is empty. Seeding dummy office assets...");
+
+            // 1. Instantiate the Global Offices with real Level 3 fields
+            Office swedenOffice = new Office { OfficeName = "Stockholm Corporate Hub", Country = "Sweden", CurrencyCode = "SEK", ExchangeRateUsd = 10.65 };
+            Office usaOffice = new Office { OfficeName = "Silicon Valley Office", Country = "USA", CurrencyCode = "USD", ExchangeRateUsd = 1.0 };
+
+            ctx.Offices.AddRange(swedenOffice, usaOffice);
+
+            // 2. CRITICAL STEP: Save now to generate valid relational database IDs for the offices!
+            ctx.SaveChanges();
 
             // Add Computer Assets
             ctx.ComputerAssets.AddRange(
@@ -51,7 +54,8 @@ namespace SmartAssetTracking.Application
                     FormFactor = ComputerFormFactor.Laptop,
                     PurchasePriceUSD = 1499.99m,
                     PurchaseDate = DateTime.Now.AddMonths(-18),
-                    SerialNumber = "LNV-THINK-9821X"
+                    SerialNumber = "LNV-THINK-9821X",
+                    OfficeId = swedenOffice.Id // Assigned to Sweden
                 },
                 new ComputerAsset
                 {
@@ -60,7 +64,8 @@ namespace SmartAssetTracking.Application
                     FormFactor = ComputerFormFactor.Desktop,
                     PurchasePriceUSD = 1999.00m,
                     PurchaseDate = DateTime.Now.AddMonths(-6),
-                    SerialNumber = "APL-STUDIO-4412M"
+                    SerialNumber = "APL-STUDIO-4412M",
+                    OfficeId = swedenOffice.Id // Assigned to Sweden
                 },
                 new ComputerAsset
                 {
@@ -69,7 +74,8 @@ namespace SmartAssetTracking.Application
                     FormFactor = ComputerFormFactor.Desktop,
                     PurchasePriceUSD = 849.50m,
                     PurchaseDate = DateTime.Now.AddYears(-2),
-                    SerialNumber = "DLL-OPTIPLEX-009A"
+                    SerialNumber = "DLL-OPTIPLEX-009A",
+                    OfficeId = usaOffice.Id // FIXED: Was missing an OfficeId! Assigned to USA
                 }
             );
 
@@ -82,7 +88,8 @@ namespace SmartAssetTracking.Application
                     DeviceType = MobileDeviceType.Phone,
                     PurchasePriceUSD = 1099.00m,
                     PurchaseDate = DateTime.Now.AddMonths(-3),
-                    SerialNumber = "APL-IPHONE-7731P"
+                    SerialNumber = "APL-IPHONE-7731P",
+                    OfficeId = swedenOffice.Id // Assigned to Sweden
                 },
                 new MobileAsset
                 {
@@ -91,7 +98,8 @@ namespace SmartAssetTracking.Application
                     DeviceType = MobileDeviceType.Phone,
                     PurchasePriceUSD = 1299.99m,
                     PurchaseDate = DateTime.Now.AddMonths(-1),
-                    SerialNumber = "SSG-GALAXY-4410U"
+                    SerialNumber = "SSG-GALAXY-4410U",
+                    OfficeId = swedenOffice.Id // Assigned to Sweden
                 },
                 new MobileAsset
                 {
@@ -100,14 +108,15 @@ namespace SmartAssetTracking.Application
                     DeviceType = MobileDeviceType.Tablet,
                     PurchasePriceUSD = 599.00m,
                     PurchaseDate = DateTime.Now.AddYears(-1),
-                    SerialNumber = "APL-IPADAIR-8821A"
+                    SerialNumber = "APL-IPADAIR-8821A",
+                    OfficeId = usaOffice.Id // FIXED: Was missing an OfficeId! Assigned to USA
                 }
             );
 
-            // Commit all changes to their respective separate MySQL tables
+            // 3. Commit all tracking items safely to database
             ctx.SaveChanges();
             Console.WriteLine("Seeding completed successfully!");
-            System.Threading.Thread.Sleep(1000); // Brief pause so user can see it seeded
+            System.Threading.Thread.Sleep(1000);
         }
     }
 }

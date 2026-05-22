@@ -25,7 +25,7 @@ namespace SmartAssetTracking.Application.Menus
             string type = MainMenu.GetAssetType();
 
             // 1. Locate the asset first across your tables
-            Asset assetToUpdate = _assetService.GetAssetByIdAndType(id, type);
+            Asset? assetToUpdate = _assetService.GetAssetByIdAndType(id, type);
 
             if (assetToUpdate == null)
             {

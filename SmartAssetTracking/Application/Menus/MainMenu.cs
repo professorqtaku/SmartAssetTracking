@@ -1,5 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using SmartAssetTracking.Entities.Asset;
+using SmartAssetTracking.Entities;
 using SmartAssetTracking.Services;
 using System;
 namespace SmartAssetTracking.Application.Menus
@@ -21,9 +21,14 @@ namespace SmartAssetTracking.Application.Menus
                 Console.WriteLine("4. Update an Asset");
                 Console.WriteLine("5. Remove an Asset");
                 Console.WriteLine("0. Exit");
+                Console.WriteLine();
+                Console.WriteLine("Extra option:");
+                Console.WriteLine("X. Show Office Report");
+                Console.WriteLine("Y. Show Global Summary Report");
                 Console.Write("\nSelect an option: ");
 
-                switch (Console.ReadLine())
+                var input = (Console.ReadLine() ?? String.Empty).ToUpper().Trim();
+                switch (input)
                 {
                     case "1": AssetListMenu.Show(); break;
                     case "2": CreateAssetMenu.CreateComputer(); break;
@@ -31,6 +36,8 @@ namespace SmartAssetTracking.Application.Menus
                     case "4": UpdateAssetMenu.Show(); break;
                     case "5": DeleteAssetMenu.Show(); break;
                     case "0": running = false; break;
+                    case "X": OfficeReportMenu.Show(); break;
+                    case "Y": GlobalSummaryMenu.Show(); break;
                     default: Console.WriteLine("Invalid option. Press Enter to retry."); Console.ReadLine(); break;
                 }
             }

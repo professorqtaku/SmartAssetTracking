@@ -8,9 +8,6 @@ namespace SmartAssetTracking.Application
 {
     public static class AssetListMenu
     {
-        private static readonly ComputerAssetService _computerService = new ComputerAssetService();
-        private static readonly MobileAssetService _mobileService = new MobileAssetService();
-
         private enum FilterType { All, Computers, Mobiles }
         private enum SortBy { None, Brand, PurchaseDate, Price }
 
@@ -29,7 +26,9 @@ namespace SmartAssetTracking.Application
                 Console.WriteLine($"Filter: {filter}    Sort: {(sortBy == SortBy.None ? "Default" : sortBy.ToString())} {(descending ? "(desc)" : "(asc)")}");
                 Console.WriteLine();
 
-                var assets = _computerService.GetAssets().Cast<Asset>().Concat(_mobileService.GetAssets()); // base set
+                var assetService = new AssetService();
+
+                var assets = assetService.GetAllAssetsSorted();
                 var view = ApplyFilter(assets, filter);
                 view = ApplySort(view, sortBy, descending);
 
@@ -41,7 +40,7 @@ namespace SmartAssetTracking.Application
                 Console.WriteLine("2. Change sort (Brand / PurchaseDate / Price)");
                 Console.WriteLine("3. Toggle sort direction (asc/desc)");
                 Console.WriteLine("4. Refresh");
-                Console.WriteLine("5. Return to previous menu");
+                Console.WriteLine("0. Return to previous menu");
                 Console.Write("\nSelect option: ");
 
                 var choice = Console.ReadLine();
@@ -58,7 +57,7 @@ namespace SmartAssetTracking.Application
                         break;
                     case "4":
                         break; // loop will refresh
-                    case "5":
+                    case "0":
                         running = false;
                         break;
                     default:

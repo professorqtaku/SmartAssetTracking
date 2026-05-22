@@ -1,5 +1,6 @@
 ﻿using SmartAssetTracking.Data;
 using SmartAssetTracking.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,75 +8,86 @@ namespace SmartAssetTracking.Services
 {
     public class AssetService
     {
-        // 📥 SAVE: Pass in a Computer OR a Mobile. 
-        // EF Core looks at the type and routes it to the correct table automatically!
         public void AddAsset(Asset newAsset)
         {
-            using (var context = new AssetDbContext())
-            {
-                context.Assets.Add(newAsset);
-                context.SaveChanges();
-            }
+            using var context = new AssetDbContext();
+            context.Assets.Add(newAsset);
+            context.SaveChanges();
         }
 
-        // 📤 READ: EF Core automatically runs a SQL 'UNION ALL' behind the scenes 
-        // to combine your two separate tables into one list for your UI.
         public List<Asset> GetAllAssetsSorted()
         {
-            using (var context = new AssetDbContext())
-            {
-                return context.Assets
-                    .AsEnumerable()
-                    .OrderBy(a => a.GetType().Name) // Sorts by Category (Computer vs Mobile)
-                    .ThenBy(a => a.PurchaseDate)    // Then sorts by date
-                    .ToList();
-            }
+            using var context = new AssetDbContext();
+
+            if (context.Assets == null) return new List<Asset>();
+
+            return context.Assets
+                .AsEnumerable()
+                .OrderBy(a => a.GetType().Name) // Level 2 Sorting: Category (Computer vs Mobile)
+                .ThenBy(a => a.PurchaseDate)    // Then sorts by date
+                .ToList();
         }
 
-        // 1. Safe Find: Look into specific tables rather than the unified tracker
-        public Asset GetAssetByIdAndType(int id, string type)
+        public Asset? GetAssetByIdAndType(int id, string type)
         {
-            using (var context = new AssetDbContext())
-            {
-                if (type.Equals("Computer", StringComparison.OrdinalIgnoreCase))
-                {
-                    return context.ComputerAssets.Find(id); // Only looks in ComputerAssets table
-                }
+            using var context = new AssetDbContext();
 
-                return context.MobileAssets.Find(id); // Only looks in MobileAssets table
+            if (type.Equals("Computer", StringComparison.OrdinalIgnoreCase))
+            {
+                return context.ComputerAssets?.Find(id);
             }
+
+            return context.MobileAssets?.Find(id);
         }
 
-        // 2. Safe Update: Target the precise entity set directly
         public void UpdateAssetSafely(Asset updatedAsset)
         {
-            using (var context = new AssetDbContext())
-            {
-                if (updatedAsset is ComputerAsset computer)
-                {
-                    context.ComputerAssets.Update(computer);
-                }
-                else if (updatedAsset is MobileAsset mobile)
-                {
-                    context.MobileAssets.Update(mobile);
-                }
+            using var context = new AssetDbContext();
 
-                context.SaveChanges();
+            if (updatedAsset is ComputerAsset computer)
+            {
+                var existingComputer = context.ComputerAssets.Find(computer.Id);
+                if (existingComputer != null)
+                {
+                    context.Entry(existingComputer).CurrentValues.SetValues(computer);
+                    existingComputer.FormFactor = computer.FormFactor; // Map type-specific properties
+                }
             }
+            else if (updatedAsset is MobileAsset mobile)
+            {
+                var existingMobile = context.MobileAssets?.Find(mobile.Id);
+                if (existingMobile != null)
+                {
+                    context.Entry(existingMobile).CurrentValues.SetValues(mobile);
+                    existingMobile.DeviceType = mobile.DeviceType; // Map type-specific properties
+                }
+            }
+
+            context.SaveChanges();
         }
 
-        //// ❌ DELETE: Finds the asset by ID across either table and deletes it
-        //public bool DeleteAsset(int id)
-        //{
-        //    using (var context = new AssetDbContext())
-        //    {
-        //        var asset = context.Assets.Find(id);
-        //        if (asset == null) return false;
+        public bool DeleteAsset(int id, string type)
+        {
+            using var context = new AssetDbContext();
 
-        //        context.Assets.Remove(asset);
-        //        context.SaveChanges();
-        //        return true;
-        //    }
-        //}
+            if (type.Equals("Computer", StringComparison.OrdinalIgnoreCase))
+            {
+                var asset = context.ComputerAssets.Find(id);
+                if (asset == null) return false;
+
+                context.ComputerAssets.Remove(asset);
+                context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                var asset = context.MobileAssets.Find(id);
+                if (asset == null) return false;
+
+                context.MobileAssets.Remove(asset);
+                context.SaveChanges();
+                return true;
+            }
+        }
     }
 }

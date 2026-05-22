@@ -1,4 +1,5 @@
-﻿using SmartAssetTracking.Services;
+﻿using SmartAssetTracking.Application.Helpers;
+using SmartAssetTracking.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,10 +8,6 @@ namespace SmartAssetTracking.Application.Menus
 {
     public class DeleteAssetMenu
     {
-        // Added the service instance so it can be called below
-        private static readonly ComputerAssetService _computerService = new ComputerAssetService();
-        private static readonly MobileAssetService _mobileService = new MobileAssetService();
-
 
         public static void Show()
         {
@@ -22,17 +19,11 @@ namespace SmartAssetTracking.Application.Menus
 
             if (int.TryParse(Console.ReadLine(), out int id))
             {
-                bool isDeleted = false;
-                if (assetType.Equals("Computer", StringComparison.OrdinalIgnoreCase))
-                {
-                    isDeleted = _computerService.DeleteAsset(id);
-                } else
-                    isDeleted = _mobileService.DeleteAsset(id);
-                {
+                var assetService = new AssetService();
+                bool isDeleted = assetService.DeleteAsset(id, assetType);
 
-                if(isDeleted) Console.WriteLine("\nAsset removed successfully! Press Enter to go back...");
+                if(isDeleted) PrintHelper.PrintSuccess("\nAsset removed successfully! Press Enter to go back...");
                     else Console.WriteLine("\nAsset ID not found. Press Enter to go back to menu...");
-                }
             }
             else
             {

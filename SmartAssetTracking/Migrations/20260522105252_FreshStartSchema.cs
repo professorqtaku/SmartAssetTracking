@@ -6,18 +6,35 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SmartAssetTracking.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FreshStartSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateSequence(
+                name: "AssetSequence");
+
             migrationBuilder.CreateTable(
-                name: "ComputerAssets",
+                name: "Offices",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FormFactor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OfficeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CurrencyCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExchangeRateUsd = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Offices", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ComputerAssets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [AssetSequence]"),
                     AssetType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Brand = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ModelName = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -26,20 +43,25 @@ namespace SmartAssetTracking.Migrations
                     SerialNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WarrantyExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Employee = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OfficeLocation = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    OfficeLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OfficeId = table.Column<int>(type: "int", nullable: true),
+                    FormFactor = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ComputerAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ComputerAssets_Offices_OfficeId",
+                        column: x => x.OfficeId,
+                        principalTable: "Offices",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "MobileAssets",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DeviceType = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [AssetSequence]"),
                     AssetType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Brand = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ModelName = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -48,12 +70,29 @@ namespace SmartAssetTracking.Migrations
                     SerialNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WarrantyExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Employee = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OfficeLocation = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    OfficeLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OfficeId = table.Column<int>(type: "int", nullable: true),
+                    DeviceType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MobileAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MobileAssets_Offices_OfficeId",
+                        column: x => x.OfficeId,
+                        principalTable: "Offices",
+                        principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ComputerAssets_OfficeId",
+                table: "ComputerAssets",
+                column: "OfficeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MobileAssets_OfficeId",
+                table: "MobileAssets",
+                column: "OfficeId");
         }
 
         /// <inheritdoc />
@@ -64,6 +103,12 @@ namespace SmartAssetTracking.Migrations
 
             migrationBuilder.DropTable(
                 name: "MobileAssets");
+
+            migrationBuilder.DropTable(
+                name: "Offices");
+
+            migrationBuilder.DropSequence(
+                name: "AssetSequence");
         }
     }
 }

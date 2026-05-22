@@ -24,7 +24,7 @@ namespace SmartAssetTracking.Migrations
 
             modelBuilder.HasSequence("AssetSequence");
 
-            modelBuilder.Entity("SmartAssetTracking.Entities.Asset.Asset", b =>
+            modelBuilder.Entity("SmartAssetTracking.Entities.Asset", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,6 +48,9 @@ namespace SmartAssetTracking.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OfficeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("OfficeLocation")
                         .HasColumnType("nvarchar(max)");
 
@@ -66,14 +69,44 @@ namespace SmartAssetTracking.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OfficeId");
+
                     b.ToTable((string)null);
 
                     b.UseTpcMappingStrategy();
                 });
 
-            modelBuilder.Entity("SmartAssetTracking.Entities.Asset.ComputerAsset", b =>
+            modelBuilder.Entity("SmartAssetTracking.Entities.Office", b =>
                 {
-                    b.HasBaseType("SmartAssetTracking.Entities.Asset.Asset");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("ExchangeRateUsd")
+                        .HasColumnType("float");
+
+                    b.Property<string>("OfficeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Offices", (string)null);
+                });
+
+            modelBuilder.Entity("SmartAssetTracking.Entities.ComputerAsset", b =>
+                {
+                    b.HasBaseType("SmartAssetTracking.Entities.Asset");
 
                     b.Property<int>("FormFactor")
                         .HasColumnType("int");
@@ -81,14 +114,28 @@ namespace SmartAssetTracking.Migrations
                     b.ToTable("ComputerAssets", (string)null);
                 });
 
-            modelBuilder.Entity("SmartAssetTracking.Entities.Asset.MobileAsset", b =>
+            modelBuilder.Entity("SmartAssetTracking.Entities.MobileAsset", b =>
                 {
-                    b.HasBaseType("SmartAssetTracking.Entities.Asset.Asset");
+                    b.HasBaseType("SmartAssetTracking.Entities.Asset");
 
                     b.Property<int>("DeviceType")
                         .HasColumnType("int");
 
                     b.ToTable("MobileAssets", (string)null);
+                });
+
+            modelBuilder.Entity("SmartAssetTracking.Entities.Asset", b =>
+                {
+                    b.HasOne("SmartAssetTracking.Entities.Office", "Office")
+                        .WithMany("Assets")
+                        .HasForeignKey("OfficeId");
+
+                    b.Navigation("Office");
+                });
+
+            modelBuilder.Entity("SmartAssetTracking.Entities.Office", b =>
+                {
+                    b.Navigation("Assets");
                 });
 #pragma warning restore 612, 618
         }

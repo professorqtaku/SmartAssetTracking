@@ -21,6 +21,9 @@ namespace SmartAssetTracking.Entities
         public string? Employee { get; set; }
         public string? OfficeLocation { get; set; }
 
+        public int? OfficeId { get; set; }
+        public Office? Office { get; set; }
+
         // Domain Rule Methods
         public int GetRemainingLifetimeMonths()
         {
@@ -39,9 +42,42 @@ namespace SmartAssetTracking.Entities
             return ConsoleColor.White;
         }
 
-        public decimal GetLocalPrice(decimal exchangeRate)
+        public decimal GetLocalPrice()
         {
-            return PurchasePriceUSD * exchangeRate;
+            if (Office == null) return PurchasePriceUSD;
+            return PurchasePriceUSD * (decimal)Office.ExchangeRateUsd;
+        }
+        public string GetFormattedLocalPrice()
+        {
+            // Safety Fallback: If the Office relation isn't loaded or assigned, fall back to default USD formatting
+            if (Office == null)
+            {
+                return $"${PurchasePriceUSD:N2}";
+            }
+
+            // 1. Calculate the localized numeric price value using our existing method
+            decimal localPrice = GetLocalPrice();
+
+            // 2. Format based on the specific currency rules from the assignment guidelines
+            switch (Office.CurrencyCode.ToUpper())
+            {
+                case "SEK":
+                    // Example Output: "15,500.00 SEK" (Symbol goes after the value)
+                    return $"{localPrice:N0} SEK";
+
+                case "EUR":
+                    // Example Output: "€1,250.00" (Symbol goes before the value)
+                    return $"€{localPrice:N2}";
+
+                case "TRY":
+                    // Example Output: "₺45,000.00"
+                    return $"₺{localPrice:N2}";
+
+                case "USD":
+                default:
+                    // Default/USA Output: "$1,499.99"
+                    return $"${localPrice:N2}";
+            }
         }
     }
 
