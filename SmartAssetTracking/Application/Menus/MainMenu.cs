@@ -23,8 +23,11 @@ namespace SmartAssetTracking.Application.Menus
                 Console.WriteLine("0. Exit");
                 Console.WriteLine();
                 Console.WriteLine("Extra option:");
-                Console.WriteLine("X. Show Office Report");
-                Console.WriteLine("Y. Show Global Summary Report");
+                Console.WriteLine("R. Show Office Report");
+                Console.WriteLine("G. Show Global Summary Report");
+                Console.WriteLine("S. Advanced Search & Filtering Panels");
+                Console.WriteLine("E. Export Structural Reports (TXT, CSV, JSON)");
+
                 Console.Write("\nSelect an option: ");
 
                 var input = (Console.ReadLine() ?? String.Empty).ToUpper().Trim();
@@ -36,8 +39,10 @@ namespace SmartAssetTracking.Application.Menus
                     case "4": UpdateAssetMenu.Show(); break;
                     case "5": DeleteAssetMenu.Show(); break;
                     case "0": running = false; break;
-                    case "X": OfficeReportMenu.Show(); break;
-                    case "Y": GlobalSummaryMenu.Show(); break;
+                    case "R": OfficeReportMenu.Show(); break;
+                    case "G": GlobalSummaryMenu.Show(); break;
+                    case "S": AdvancedSearchMenu.Show(); break;
+                    case "E": DataExportMenu.Show(); break;
                     default: Console.WriteLine("Invalid option. Press Enter to retry."); Console.ReadLine(); break;
                 }
             }
